@@ -1,0 +1,49 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+description = 'spring-jdbc-examples'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // H2 데이터베이스 — JDBC 드라이버와 인메모리 DB가 함께 들어 있다(별도 설치 불필요)
+    implementation 'com.h2database:h2:2.4.240'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+// 예제 실행 태스크 — ./gradlew -q ex01 … ./gradlew -q ex07, 과제 hw1·hw2
+// (IntelliJ에서는 각 클래스의 main 메서드 왼쪽 ▶ 버튼으로 실행해도 된다)
+def examples = [
+        ex01: 'ex01connection.ConnectionExample',      // [교안 2.4]
+        ex02: 'ex02statement.StatementExample',        // [교안 3.4]
+        ex03: 'ex03prepared.PreparedStatementExample', // [교안 3.5]
+        ex04: 'ex04resultset.ResultSetExample',        // [교안 4.2]
+        ex05: 'ex05dao.MemberDaoExample',              // [교안 5.2]
+        ex06: 'ex06transaction.TransactionExample',    // [교안 6.3]
+        ex07: 'ex07template.TemplateExample',          // [교안 7.2]
+        hw1 : 'homework.Hw1AgeRangeExample',           // [교안 과제 1] 풀이
+        hw2 : 'homework.Hw2DaoTransactionExample',     // [교안 과제 2] 확인용
+]
+examples.each { taskName, className ->
+    tasks.register(taskName, JavaExec) {
+        group = 'examples'
+        description = "com.example.jdbc.${className} 실행"
+        classpath = sourceSets.main.runtimeClasspath
+        mainClass = "com.example.jdbc.${className}"
+        jvmArgs '-Dstdout.encoding=UTF-8', '-Dstderr.encoding=UTF-8'   // 콘솔 한글 깨짐 방지
+    }
+}
